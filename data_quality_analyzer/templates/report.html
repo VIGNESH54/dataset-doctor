@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Quality Report</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 1200px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; }
+        h1, h2, h3 { color: #2c3e50; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .score-container { display: flex; align-items: center; justify-content: space-between; }
+        .gauge-chart { max-width: 300px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .col-card { border-top: 4px solid #ccc; }
+        .col-card.green { border-top-color: #28a745; }
+        .col-card.yellow { border-top-color: #ffc107; }
+        .col-card.red { border-top-color: #dc3545; }
+        .stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 5px 0; }
+        .insights-section { background: #e8f4f8; }
+        pre { background: #f1f1f1; padding: 10px; border-radius: 4px; overflow-x: auto; }
+        .warning { color: #856404; background-color: #fff3cd; padding: 10px; border-radius: 4px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Data Quality Analyzer Report</h1>
+    
+    <div class="card score-container">
+        <div>
+            <h2>Dataset Overview</h2>
+            <p><strong>Rows:</strong> {{ profile.num_rows }}</p>
+            <p><strong>Columns:</strong> {{ profile.num_cols }}</p>
+            <p><strong>Overall Score:</strong> {{ score_data.score }}/100</p>
+            {% if score_data.warnings %}
+            <div class="warning">
+                <strong>Warnings:</strong>
+                <ul>
+                    {% for w in score_data.warnings %}
+                    <li>{{ w }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        <div class="gauge-chart">
+            <img src="data:image/png;base64,{{ gauge_chart }}" alt="Score Gauge" style="width: 100%;">
+        </div>
+    </div>
+
+    <div class="card insights-section">
+        <h2>🤖 LLM Insights (Claude)</h2>
+        <p><strong>Overall Assessment:</strong> {{ llm_insights.overall_assessment }}</p>
+        
+        <h3>Critical Issues</h3>
+        <ul>
+            {% for issue in llm_insights.critical_issues %}
+            <li>{{ issue }}</li>
+            {% endfor %}
+        </ul>
+        
+        {% if llm_insights.warnings %}
+        <h3>Warnings (e.g. Target Leakage)</h3>
+        <ul>
+            {% for warning in llm_insights.warnings %}
+            <li>{{ warning }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        
+        <h3>Suggested Cleaning Steps</h3>
+        <pre><code>{% for step in llm_insights.cleaning_steps %}
+{{ step }}
+{% endfor %}</code></pre>
+    </div>
+
+    <h2>Column Profiles</h2>
+    <div class="grid">
+        {% for col_name, stats in profile.columns.items() %}
+        {% set missing_pct = stats.missing_percentage %}
+        {% set color_class = 'green' if missing_pct < 5 else ('yellow' if missing_pct < 20 else 'red') %}
+        
+        <div class="card col-card {{ color_class }}">
+            <h3>{{ col_name }}</h3>
+            <div class="stat-row"><span>Type</span> <span>{{ stats.inferred_type }}</span></div>
+            <div class="stat-row"><span>Missing</span> <span>{{ stats.missing_count }} ({{ "%.1f"|format(missing_pct) }}%)</span></div>
+            <div class="stat-row"><span>Unique</span> <span>{{ stats.unique_count }}</span></div>
+            
+            {% if stats.is_numeric %}
+            <div class="stat-row"><span>Mean</span> <span>{{ "%.2f"|format(stats.mean) }}</span></div>
+            <div class="stat-row"><span>Outliers</span> <span>{{ stats.outlier_count }}</span></div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
