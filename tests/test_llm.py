@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from data_quality_analyzer.llm import LLMInsightGenerator
+from dataset_doctor.llm import LLMInsightGenerator
 
 def test_llm_insight_generator_no_api_key():
     llm = LLMInsightGenerator(api_key="")
@@ -8,7 +8,7 @@ def test_llm_insight_generator_no_api_key():
     assert insights["overall_assessment"] == "Could not generate insights."
     assert "LLM insights unavailable." in insights["critical_issues"]
 
-@patch('data_quality_analyzer.llm.Anthropic')
+@patch('dataset_doctor.llm.Anthropic')
 def test_llm_insight_generator_success(mock_anthropic):
     # Mock the API response
     mock_client = MagicMock()

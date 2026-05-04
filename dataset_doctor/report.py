@@ -51,7 +51,9 @@ class ReportGenerator:
                        profile: Dict[str, Any], 
                        score_data: Dict[str, Any], 
                        llm_insights: Dict[str, Any],
-                       output_path: str) -> None:
+                       output_path: str,
+                       leakage_report: Any = None,
+                       ts_report: Any = None) -> None:
         """Render the HTML report and save to file."""
         template = self.env.get_template("report.html")
         
@@ -61,7 +63,9 @@ class ReportGenerator:
             profile=profile,
             score_data=score_data,
             llm_insights=llm_insights,
-            gauge_chart=gauge_b64
+            gauge_chart=gauge_b64,
+            leakage_report=leakage_report,
+            ts_report=ts_report
         )
         
         # Ensure directory exists

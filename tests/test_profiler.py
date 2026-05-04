@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-from data_quality_analyzer.profiler import DataProfiler
+from dataset_doctor.profiler import DataProfiler
 
 def test_profiler_empty_dataset():
     df = pd.DataFrame()

@@ -1,5 +1,5 @@
 import pytest
-from data_quality_analyzer.scorer import QualityScorer
+from dataset_doctor.scorer import QualityScorer
 
 def test_scorer_empty_dataset():
     scorer = QualityScorer({"num_rows": 0, "num_cols": 0, "columns": {}})

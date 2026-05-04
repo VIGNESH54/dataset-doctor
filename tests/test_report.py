@@ -1,6 +1,6 @@
 import os
 import tempfile
-from data_quality_analyzer.report import ReportGenerator
+from dataset_doctor.report import ReportGenerator
 
 def test_report_generator_html_output():
     report_gen = ReportGenerator()

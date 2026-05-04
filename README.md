@@ -1,13 +1,32 @@
-# Data Quality Analyzer
+# 🩺 Dataset Doctor
 
-A production-ready Python tool that takes any CSV dataset as input, runs automated statistical quality checks, uses an LLM (Anthropic Claude 3 Haiku) to generate human-readable insights and recommendations, and produces a comprehensive HTML report.
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](https://github.com/VIGNESH54/Automated-Data-Quality-Analyzer/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A production-ready Python tool that "diagnoses" your data. It takes any CSV dataset as input, runs automated statistical quality checks, uses an LLM (Anthropic Claude 3 Haiku) to generate human-readable insights, and produces a comprehensive HTML report.
+
+## Why Dataset Doctor?
+
+| Feature | Dataset Doctor | ydata-profiling | Great Expectations | Deepchecks |
+| :--- | :---: | :---: | :---: | :---: |
+| **LLM Cleaning Code** | ✅ | ❌ | ❌ | ❌ |
+| **ML Leakage Detection** | ✅ | ❌ | ❌ | ✅ |
+| **TS Health Scoring** | ✅ | ⚠️ | ❌ | ⚠️ |
+| **Zero-Server HTML** | ✅ | ✅ | ❌ | ✅ |
+| **Pipeline Integration** | ⚠️ | ⚠️ | ✅ | ⚠️ |
+| **Statistical Depth** | ⚠️ | ✅ | ⚠️ | ✅ |
+
+> **Comparison Note**: While `Great Expectations` excels at production pipeline integration and `ydata-profiling` offers deeper statistical distributions, **Dataset Doctor** is uniquely focused on actionable AI-driven insights and specialized ML/Time-Series diagnostics in a lightweight, zero-config package.
 
 ## Features
 
 - **Data Profiling**: Computes missing values, uniqueness, data types, and statistical metrics (mean, median, std, skewness, kurtosis, outliers).
 - **Quality Scoring**: Assigns a score (0-100) based on missing values, outliers, duplicate rows, and type inconsistencies.
-- **LLM Insights**: Leverages Anthropic Claude to analyze the profile and provide critical issues, cleaning steps, and warnings (e.g., target leakage).
-- **HTML Report**: Generates a self-contained, beautifully styled HTML report with gauge charts and color-coded metrics.
+- **LLM Insights**: Leverages Anthropic Claude to analyze the profile and provide critical issues, cleaning steps, and warnings.
+- **ML Readiness**: Detects target leakage, ID columns, and train-test contamination.
+- **Time Series Health**: Identifies gaps, out-of-order timestamps, and non-stationary series.
+- **HTML Report**: Generates a self-contained, beautifully styled HTML report with gauge charts.
 
 ## Installation
 
@@ -33,27 +52,30 @@ python main.py --input sample_data/messy.csv --output reports/report.html --llm-
 - `--input`: Path to your CSV dataset.
 - `--output`: Path where the HTML report will be saved.
 - `--llm-insights`: (Optional) Include to fetch insights from Claude. Requires the `ANTHROPIC_API_KEY` to be set.
+- `--target-column`: (Optional) Enable ML leakage detection for a specific target.
 
 ### Sample Data
-Three sample datasets are included for demonstration:
-- `sample_data/clean.csv`: A clean dataset with no missing values.
-- `sample_data/messy.csv`: Contains missing values, outliers, and type inconsistencies.
-- `sample_data/leakage.csv`: Contains columns that strongly leak the target variable.
+Sample datasets are included for demonstration:
+- `sample_data/clean.csv`: A clean dataset.
+- `sample_data/messy.csv`: Contains missing values and outliers.
+- `sample_data/leaky_dataset.csv`: Demonstrates ML leakage detection.
+- `sample_data/timeseries.csv`: Demonstrates time series health checks.
 
 ## Architecture Overview
 
-- `profiler.py`: `DataProfiler` calculates statistics without modifying the data.
+- `profiler.py`: `DataProfiler` calculates statistics.
 - `scorer.py`: `QualityScorer` computes penalty-based scoring.
-- `llm.py`: `LLMInsightGenerator` handles communication with the Anthropic API.
-- `report.py`: `ReportGenerator` creates the final HTML using Jinja2 and Matplotlib.
-- `cli.py`: Connects all components and provides console output using `rich`.
+- `leakage_detector.py`: `LeakageDetector` identifies ML risks.
+- `timeseries_checker.py`: `TimeSeriesChecker` analyzes temporal integrity.
+- `llm.py`: `LLMInsightGenerator` handles communication with Claude.
+- `report.py`: `ReportGenerator` creates the final HTML.
+- `cli.py`: Connects all components using `rich`.
 
 ## Design Decisions and Known Limitations
 
-- **Scalability**: The `DataProfiler` currently loads the entire dataset into memory via pandas. Extremely large datasets might cause memory issues.
-- **LLM Insights Constraints**: The prompt passes a JSON summary of the dataset profile, not the raw data. The LLM can only infer based on statistical summaries. It cannot detect complex row-level data entry errors or nuanced domain-specific anomalies that aren't reflected in the summary stats.
-- **Data Type Inference**: The type consistency check is simplified and relies on pandas' internal dtype handling and checking the python types of non-null values.
-- **Correlation Matrix**: Currently calculated only for purely numeric columns. Mixed-type columns (even if mostly numeric) are excluded to prevent errors.
+- **Scalability**: Entire dataset is loaded into memory.
+- **LLM Context**: We pass statistical summaries, not raw rows, to ensure privacy and token efficiency.
+- **Stationarity**: Uses Augmented Dickey-Fuller (ADF) which works best on series with >20 points.
 
 ## Testing
 

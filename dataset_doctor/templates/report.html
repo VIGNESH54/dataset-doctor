@@ -72,6 +72,59 @@
 {% endfor %}</code></pre>
     </div>
 
+    {% if leakage_report %}
+    <div class="card ml-readiness" style="background: #fdf2f2;">
+        <h2>🚀 ML Readiness & Leakage Detection</h2>
+        <div class="grid">
+            <div class="card col-card {{ 'red' if leakage_report.high_risk_columns else 'green' }}">
+                <h3>Leakage Risk</h3>
+                <p><strong>High Risk:</strong> {{ leakage_report.high_risk_columns|join(', ') or 'None' }}</p>
+                <p><strong>Medium Risk:</strong> {{ leakage_report.medium_risk_columns|join(', ') or 'None' }}</p>
+            </div>
+            <div class="card col-card {{ 'red' if leakage_report.contamination_percentage > 1 else 'green' }}">
+                <h3>Contamination</h3>
+                <p><strong>Train-Test Overlap:</strong> {{ "%.2f"|format(leakage_report.contamination_percentage) }}%</p>
+            </div>
+            <div class="card col-card {{ 'yellow' if leakage_report.id_columns else 'green' }}">
+                <h3>ID Columns</h3>
+                <p><strong>Detected:</strong> {{ leakage_report.id_columns|join(', ') or 'None' }}</p>
+            </div>
+        </div>
+        
+        <h3>Recommendations</h3>
+        <ul>
+            {% for rec in leakage_report.recommendations %}
+            <li>{{ rec }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if ts_report %}
+    <div class="card ts-health" style="background: #f2fdf2;">
+        <h2>📈 Time Series Health</h2>
+        <p><strong>Primary Datetime Column:</strong> {{ ts_report.datetime_columns[0] }}</p>
+        <p><strong>Health Score:</strong> {{ ts_report.overall_ts_health_score }}/100</p>
+        
+        <div class="grid">
+            <div class="card col-card {{ 'red' if ts_report.gap_count > 0 else 'green' }}">
+                <h3>Interval Integrity</h3>
+                <p><strong>Gaps Detected:</strong> {{ ts_report.gap_count }}</p>
+                <p><strong>Out of Order:</strong> {{ ts_report.out_of_order_count }}</p>
+                <p><strong>Duplicates:</strong> {{ ts_report.duplicate_timestamp_count }}</p>
+            </div>
+            <div class="card col-card {{ 'red' if ts_report.spike_count > 0 else 'green' }}">
+                <h3>Signal Quality</h3>
+                <p><strong>Sudden Spikes:</strong> {{ ts_report.spike_count }}</p>
+            </div>
+            <div class="card col-card {{ 'yellow' if ts_report.non_stationary_columns else 'green' }}">
+                <h3>Stationarity</h3>
+                <p><strong>Non-Stationary Columns:</strong> {{ ts_report.non_stationary_columns|join(', ') or 'None' }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <h2>Column Profiles</h2>
     <div class="grid">
         {% for col_name, stats in profile.columns.items() %}
