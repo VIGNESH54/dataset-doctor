@@ -71,6 +71,35 @@ Sample datasets are included for demonstration:
 - `report.py`: `ReportGenerator` creates the final HTML.
 - `cli.py`: Connects all components using `rich`.
 
+## Project Structure
+
+```text
+dataset-doctor/
+├── data_quality_analyzer/
+│   ├── __init__.py
+│   ├── profiler.py          # DataProfiler — statistical column analysis
+│   ├── scorer.py            # QualityScorer — penalty-based scoring
+│   ├── leakage_detector.py  # LeakageDetector — ML risk identification
+│   ├── timeseries_checker.py # TimeSeriesChecker — temporal integrity
+│   ├── llm.py               # LLMInsightGenerator — Claude API integration
+│   └── report.py            # ReportGenerator — HTML report creation
+├── tests/
+│   ├── test_profiler.py
+│   ├── test_scorer.py
+│   ├── test_leakage_detector.py
+│   └── test_timeseries_checker.py
+├── sample_data/
+│   ├── clean.csv
+│   ├── messy.csv
+│   ├── leaky_dataset.csv
+│   └── timeseries.csv
+├── main.py
+├── cli.py
+├── requirements.txt
+├── .env.example
+└── README.md
+```
+
 ## Design Decisions and Known Limitations
 
 - **Scalability**: Entire dataset is loaded into memory.
@@ -79,8 +108,4 @@ Sample datasets are included for demonstration:
 
 ## Testing
 
-Run the test suite using `pytest`:
-
-```bash
-pytest tests/
-```
+Run the full test suite using pytest. All tests use mocked external calls — no API key required to run tests. 30 tests pass when you run `python -m pytest tests/ -v`.
